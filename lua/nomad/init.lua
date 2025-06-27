@@ -26,19 +26,19 @@ function M.setup(opts)
 
   -- Merge user config with defaults
   config.setup(opts)
-  
+
   -- Register telescope extension
   telescope_extension.setup()
-  
+
   -- Set up global keymaps if configured
   if config.options.keymaps.toggle_sidebar then
-    vim.keymap.set('n', config.options.keymaps.toggle_sidebar, function()
+    vim.keymap.set("n", config.options.keymaps.toggle_sidebar, function()
       M.toggle_sidebar()
     end, { desc = "Toggle Nomad sidebar" })
   end
-  
+
   if config.options.keymaps.toggle_floating then
-    vim.keymap.set('n', config.options.keymaps.toggle_floating, function()
+    vim.keymap.set("n", config.options.keymaps.toggle_floating, function()
       M.toggle_floating_right()
     end, { desc = "Toggle floating sidebar on right" })
   end
@@ -64,7 +64,7 @@ function M.open_sidebar()
   -- Create and show sidebar
   ui.create_sidebar()
   M.state.sidebar_open = true
-  
+
   -- Load data if not already loaded
   if (#M.state.jobs == 0 and #M.state.nodes == 0) and not M.state.loading then
     M.refresh_cluster_data()
@@ -72,7 +72,7 @@ function M.open_sidebar()
     ui.update_sidebar({
       jobs = M.state.jobs,
       nodes = M.state.nodes,
-      topology = M.state.topology
+      topology = M.state.topology,
     })
   end
 end
@@ -94,7 +94,7 @@ function M.refresh_cluster_data()
   end
 
   M.state.loading = true
-  
+
   -- Update UI to show loading state
   if M.state.sidebar_open then
     ui.show_loading()
@@ -105,11 +105,11 @@ function M.refresh_cluster_data()
   local nodes_done = false
   local jobs_error = nil
   local nodes_error = nil
-  
+
   local function check_completion()
     if jobs_done and nodes_done then
       M.state.loading = false
-      
+
       vim.schedule(function()
         if jobs_error and nodes_error then
           vim.notify("Failed to fetch cluster data: " .. jobs_error .. "; " .. nodes_error, vim.log.levels.ERROR)
@@ -125,17 +125,16 @@ function M.refresh_cluster_data()
 
         -- Generate topology data
         M.state.topology = nomad.generate_topology(M.state.jobs, M.state.nodes)
-        
+
         -- Update sidebar if open
         if M.state.sidebar_open then
           ui.update_sidebar({
             jobs = M.state.jobs,
             nodes = M.state.nodes,
-            topology = M.state.topology
+            topology = M.state.topology,
           })
         end
-        
-        local total = #M.state.jobs + #M.state.nodes
+
         vim.notify("Refreshed " .. #M.state.jobs .. " jobs and " .. #M.state.nodes .. " nodes", vim.log.levels.INFO)
       end)
     end
@@ -190,7 +189,7 @@ function M.show_job_details(job)
         vim.notify("Failed to get job details: " .. error, vim.log.levels.ERROR)
         return
       end
-      
+
       ui.show_job_details_enhanced(job, details)
     end)
   end)
@@ -204,7 +203,7 @@ function M.show_node_details(node)
         vim.notify("Failed to get node details: " .. error, vim.log.levels.ERROR)
         return
       end
-      
+
       ui.show_node_details(node, details)
     end)
   end)
@@ -233,7 +232,7 @@ function M.show_topology()
         ui.show_topology(M.state.topology)
         return
       end
-      
+
       -- Generate enhanced topology with allocations
       nomad.generate_enhanced_topology(M.state.jobs, M.state.nodes, allocations, function(enhanced_topology, topo_error)
         if topo_error then
@@ -250,7 +249,7 @@ end
 
 -- Copy job ID to clipboard
 function M.copy_job_id(job)
-  vim.fn.setreg('+', job.ID)
+  vim.fn.setreg("+", job.ID)
   vim.schedule(function()
     vim.notify("Copied job ID: " .. job.ID, vim.log.levels.INFO)
   end)
@@ -258,7 +257,7 @@ end
 
 -- Copy node ID to clipboard
 function M.copy_node_id(node)
-  vim.fn.setreg('+', node.ID)
+  vim.fn.setreg("+", node.ID)
   vim.schedule(function()
     vim.notify("Copied node ID: " .. node.ID, vim.log.levels.INFO)
   end)
@@ -267,7 +266,7 @@ end
 -- Toggle sidebar to floating on the right
 function M.toggle_floating_right()
   local current_config = config.get()
-  
+
   if current_config.sidebar.position == "float" then
     -- Switch back to left split
     current_config.sidebar.position = "left"
@@ -275,7 +274,7 @@ function M.toggle_floating_right()
     -- Switch to floating on the right
     current_config.sidebar.position = "float"
   end
-  
+
   -- Close current sidebar if open
   if M.state.sidebar_open then
     M.close_sidebar()
@@ -363,17 +362,17 @@ function M.show_job_logs(job_id, alloc_id, task_name)
   vim.schedule(function()
     vim.notify("Loading logs for " .. job_id .. "...", vim.log.levels.INFO)
   end)
-  
+
   nomad.get_allocation_logs(alloc_id, task_name or "main", function(logs, error)
     vim.schedule(function()
       if error then
         vim.notify("Failed to get logs: " .. error, vim.log.levels.ERROR)
         return
       end
-      
+
       ui.show_logs_buffer(job_id, alloc_id, task_name or "main", logs)
     end)
   end)
 end
 
-return M 
+return M

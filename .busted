@@ -1,0 +1,13 @@
+return {
+  default = {
+    verbose = true,
+    lpath = "lua/?.lua;lua/?/init.lua;tests/?.lua",
+    pattern = "_spec",
+    ROOT = {"."},
+    exclude = {
+      "lua/telescope/_extensions/",
+    },
+    output = "TAP",
+    helper = "tests/spec_helper"
+  }
+} 

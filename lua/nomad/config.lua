@@ -18,16 +18,16 @@ M.defaults = {
       height = "90%",
     },
   },
-  
+
   -- Nomad configuration
   nomad = {
     address = nil, -- nil to use NOMAD_ADDR environment variable
-    token = nil,   -- nil to use NOMAD_TOKEN environment variable
+    token = nil, -- nil to use NOMAD_TOKEN environment variable
     timeout = 30000, -- timeout in milliseconds
     namespace = "default", -- default namespace
     region = nil, -- nil to use default region
   },
-  
+
   -- UI configuration
   ui = {
     show_icons = true,
@@ -39,7 +39,7 @@ M.defaults = {
     indent = "  ",
     refresh_interval = 30, -- seconds
   },
-  
+
   -- Keybindings
   keymaps = {
     toggle_sidebar = "<leader>no",
@@ -62,23 +62,23 @@ M.defaults = {
     drain_node = "d",
     enable_node = "E",
   },
-  
+
   -- Debug mode
   debug = false,
-  
+
   -- Cache configuration
   cache = {
     ttl_seconds = 30, -- 30 seconds cache TTL for cluster data
     auto_cleanup = true,
   },
-  
+
   -- Rate limiting configuration
   rate_limiting = {
     enabled = true,
     min_interval_ms = 500, -- Minimum 0.5 second between requests
     max_requests_per_minute = 60, -- More permissive for local cluster
   },
-  
+
   -- Topology view configuration
   topology = {
     show_allocation_details = true,
@@ -146,18 +146,23 @@ M.resource_icons = {
 -- Setup configuration
 function M.setup(opts)
   M.options = vim.tbl_deep_extend("force", M.defaults, opts or {})
-  
+
   -- Validate configuration
   M.validate()
-  
+
   if M.options.debug then
     vim.schedule(function()
       vim.notify("Nomad.nvim configuration loaded", vim.log.levels.DEBUG)
       -- Only show brief config summary in debug mode
-      vim.notify(string.format("Nomad address: %s, Namespace: %s, Sidebar: %s", 
-        M.get_nomad_address(), 
-        M.get_nomad_namespace(),
-        M.options.sidebar.position), vim.log.levels.DEBUG)
+      vim.notify(
+        string.format(
+          "Nomad address: %s, Namespace: %s, Sidebar: %s",
+          M.get_nomad_address(),
+          M.get_nomad_namespace(),
+          M.options.sidebar.position
+        ),
+        vim.log.levels.DEBUG
+      )
     end)
   end
 end
@@ -165,13 +170,17 @@ end
 -- Validate configuration
 function M.validate()
   -- Validate sidebar position
-  if M.options.sidebar.position ~= "left" and M.options.sidebar.position ~= "right" and M.options.sidebar.position ~= "float" then
+  if
+    M.options.sidebar.position ~= "left"
+    and M.options.sidebar.position ~= "right"
+    and M.options.sidebar.position ~= "float"
+  then
     vim.schedule(function()
       vim.notify("Invalid sidebar position. Using 'left'", vim.log.levels.WARN)
     end)
     M.options.sidebar.position = "left"
   end
-  
+
   -- Validate sidebar width
   if type(M.options.sidebar.width) ~= "number" or M.options.sidebar.width < 30 or M.options.sidebar.width > 120 then
     vim.schedule(function()
@@ -179,7 +188,7 @@ function M.validate()
     end)
     M.options.sidebar.width = 45
   end
-  
+
   -- Validate timeout
   if type(M.options.nomad.timeout) ~= "number" or M.options.nomad.timeout < 1000 then
     vim.schedule(function()
@@ -187,7 +196,7 @@ function M.validate()
     end)
     M.options.nomad.timeout = 30000
   end
-  
+
   -- Validate refresh interval
   if type(M.options.ui.refresh_interval) ~= "number" or M.options.ui.refresh_interval < 5 then
     vim.schedule(function()
@@ -202,7 +211,7 @@ function M.get_job_status_icon(status)
   if not M.options.ui.show_icons then
     return ""
   end
-  
+
   return M.job_status_icons[status] or M.job_status_icons.unknown
 end
 
@@ -211,7 +220,7 @@ function M.get_node_status_icon(status)
   if not M.options.ui.show_icons then
     return ""
   end
-  
+
   return M.node_status_icons[status] or M.node_status_icons.unknown
 end
 
@@ -220,7 +229,7 @@ function M.get_job_type_icon(job_type)
   if not M.options.ui.show_icons then
     return ""
   end
-  
+
   return M.job_type_icons[job_type] or M.job_type_icons.unknown
 end
 
@@ -229,7 +238,7 @@ function M.get_node_class_icon(node_class)
   if not M.options.ui.show_icons then
     return ""
   end
-  
+
   return M.node_class_icons[node_class] or M.node_class_icons.default
 end
 
@@ -238,7 +247,7 @@ function M.get_resource_icon(resource_type)
   if not M.options.ui.show_icons then
     return ""
   end
-  
+
   return M.resource_icons[resource_type] or ""
 end
 
@@ -267,4 +276,4 @@ function M.get_nomad_region()
   return M.options.nomad.region or os.getenv("NOMAD_REGION")
 end
 
-return M 
+return M
