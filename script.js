@@ -155,18 +155,19 @@ window.addEventListener('scroll', function() {
     }
 });
 
-// Add loading animation to demo placeholder
+// Add subtle parallax effect to demo image
 document.addEventListener('DOMContentLoaded', function() {
-    const demoPlaceholder = document.querySelector('.demo-placeholder');
+    const demoImage = document.querySelector('.demo-image');
     
-    if (demoPlaceholder) {
-        // Add a subtle pulse animation
-        setInterval(() => {
-            demoPlaceholder.style.transform = 'scale(1.02)';
-            setTimeout(() => {
-                demoPlaceholder.style.transform = 'scale(1)';
-            }, 1000);
-        }, 4000);
+    if (demoImage) {
+        window.addEventListener('scroll', function() {
+            const scrolled = window.pageYOffset;
+            const rate = scrolled * -0.1;
+            
+            if (scrolled < window.innerHeight) {
+                demoImage.style.transform = `translateY(${rate}px)`;
+            }
+        });
     }
 });
 
