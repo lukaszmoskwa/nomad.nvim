@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nomad.nvim - Nomad Cluster Explorer for Neovim</title>
+    <meta name="description" content="A beautiful Neovim plugin for exploring and managing HashiCorp Nomad clusters directly from your editor">
+    <meta name="keywords" content="neovim, nomad, hashicorp, cluster, plugin, devops, lua">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://lukaszmoskwa.github.io/nomad.nvim/">
+    <meta property="og:title" content="Nomad.nvim - Nomad Cluster Explorer for Neovim">
+    <meta property="og:description" content="A beautiful Neovim plugin for exploring and managing HashiCorp Nomad clusters directly from your editor">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://lukaszmoskwa.github.io/nomad.nvim/">
+    <meta property="twitter:title" content="Nomad.nvim - Nomad Cluster Explorer for Neovim">
+    <meta property="twitter:description" content="A beautiful Neovim plugin for exploring and managing HashiCorp Nomad clusters directly from your editor">
+    
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-rocket"></i>
+                <span>Nomad.nvim</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#installation">Installation</a></li>
+                <li><a href="#usage">Usage</a></li>
+                <li><a href="#docs">Documentation</a></li>
+                <li><a href="https://github.com/lukaszmoskwa/nomad.nvim" target="_blank" class="github-link">
+                    <i class="fab fa-github"></i> GitHub
+                </a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>
+                        <i class="fas fa-rocket"></i>
+                        Nomad.nvim
+                    </h1>
+                    <p class="hero-subtitle">Nomad Cluster Explorer for Neovim</p>
+                    <p class="hero-description">
+                        A beautiful sidebar interface to explore and manage your HashiCorp Nomad cluster 
+                        directly from your editor. Monitor jobs, nodes, and cluster topology with ease.
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="#installation" class="btn btn-primary">
+                            <i class="fas fa-download"></i>
+                            Get Started
+                        </a>
+                        <a href="https://github.com/lukaszmoskwa/nomad.nvim" target="_blank" class="btn btn-secondary">
+                            <i class="fab fa-github"></i>
+                            View on GitHub
+                        </a>
+                    </div>
+                </div>
+                <div class="hero-demo">
+                    <div class="demo-placeholder">
+                        <div class="demo-text">
+                            <i class="fas fa-image"></i>
+                            <p>Plugin Screenshot</p>
+                            <small>Coming Soon</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2>✨ Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3>Interactive Sidebar</h3>
+                    <p>Browse jobs and nodes with real-time status updates in a beautiful sidebar interface</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-telescope"></i>
+                    </div>
+                    <h3>Telescope Integration</h3>
+                    <p>Fuzzy search jobs and nodes with advanced filtering using telescope.nvim</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-network-wired"></i>
+                    </div>
+                    <h3>Enhanced Cluster Topology</h3>
+                    <p>Interactive full-buffer view showing resource usage and allocations per node</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h3>Job Logs Viewer</h3>
+                    <p>Interactive logs display with refresh and follow capabilities</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-play-circle"></i>
+                    </div>
+                    <h3>Job Control</h3>
+                    <p>Start, stop, restart jobs directly from Neovim with simple commands</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <h3>Node Management</h3>
+                    <p>Drain and enable nodes with a single command for cluster maintenance</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-window-restore"></i>
+                    </div>
+                    <h3>Multiple Layouts</h3>
+                    <p>Sidebar, floating window, or split pane - choose your preferred layout</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <h3>Async Operations</h3>
+                    <p>Non-blocking API calls with intelligent caching and rate limiting</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>ACL Support</h3>
+                    <p>Works seamlessly with Nomad clusters that have ACLs enabled</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h3>Multi-Datacenter</h3>
+                    <p>Support for multi-datacenter Nomad clusters with region switching</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Resource Monitoring</h3>
+                    <p>View CPU, memory, and disk usage per node in real-time</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-memory"></i>
+                    </div>
+                    <h3>Smart Caching</h3>
+                    <p>Intelligent caching system to reduce API load and improve performance</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Installation Section -->
+    <section id="installation" class="installation">
+        <div class="container">
+            <h2>🚀 Installation</h2>
+            <div class="install-methods">
+                <div class="install-method">
+                    <h3><i class="fas fa-bolt"></i> Using lazy.nvim</h3>
+                    <pre><code class="language-lua">{
+  "lukaszmoskwa/nomad.nvim",
+  dependencies = {
+    "MunifTanjim/nui.nvim",
+    "nvim-telescope/telescope.nvim",
+    "nvim-lua/plenary.nvim",
+    "nvim-tree/nvim-web-devicons", -- optional
+  },
+  config = function()
+    require("nomad").setup({
+      -- your configuration here
+    })
+  end,
+}</code></pre>
+                </div>
+                <div class="install-method">
+                    <h3><i class="fas fa-package"></i> Using packer.nvim</h3>
+                    <pre><code class="language-lua">use {
+  "lukaszmoskwa/nomad.nvim",
+  requires = {
+    "MunifTanjim/nui.nvim",
+    "nvim-telescope/telescope.nvim",
+    "nvim-lua/plenary.nvim",
+    "nvim-tree/nvim-web-devicons", -- optional
+  },
+  config = function()
+    require("nomad").setup()
+  end,
+}</code></pre>
+                </div>
+            </div>
+            
+            <div class="requirements">
+                <h3>📋 Requirements</h3>
+                <ul>
+                    <li><strong>Neovim</strong> >= 0.8.0</li>
+                    <li><strong>Nomad cluster</strong> accessible via HTTP API</li>
+                    <li><strong>Required plugins:</strong>
+                        <ul>
+                            <li><a href="https://github.com/MunifTanjim/nui.nvim">nui.nvim</a></li>
+                            <li><a href="https://github.com/nvim-telescope/telescope.nvim">telescope.nvim</a></li>
+                            <li><a href="https://github.com/nvim-lua/plenary.nvim">plenary.nvim</a></li>
+                            <li><a href="https://github.com/nvim-tree/nvim-web-devicons">nvim-web-devicons</a> (optional)</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Usage Section -->
+    <section id="usage" class="usage">
+        <div class="container">
+            <h2>🎯 Usage</h2>
+            <div class="usage-grid">
+                <div class="usage-section">
+                    <h3>Basic Commands</h3>
+                    <div class="command-list">
+                        <div class="command">
+                            <code>:NomadToggle</code>
+                            <span>Toggle the sidebar</span>
+                        </div>
+                        <div class="command">
+                            <code>:NomadRefresh</code>
+                            <span>Refresh cluster data</span>
+                        </div>
+                        <div class="command">
+                            <code>:NomadSearchJobs</code>
+                            <span>Open Telescope job search</span>
+                        </div>
+                        <div class="command">
+                            <code>:NomadTopology</code>
+                            <span>Show cluster topology</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="usage-section">
+                    <h3>Default Keybindings</h3>
+                    <div class="keybinding-list">
+                        <div class="keybinding">
+                            <kbd>&lt;leader&gt;no</kbd>
+                            <span>Toggle sidebar</span>
+                        </div>
+                        <div class="keybinding">
+                            <kbd>&lt;CR&gt;</kbd>
+                            <span>View job/node details</span>
+                        </div>
+                        <div class="keybinding">
+                            <kbd>r</kbd>
+                            <span>Refresh cluster data</span>
+                        </div>
+                        <div class="keybinding">
+                            <kbd>j</kbd>
+                            <span>Search jobs with Telescope</span>
+                        </div>
+                        <div class="keybinding">
+                            <kbd>t</kbd>
+                            <span>Show cluster topology</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="config-example">
+                <h3>⚙️ Configuration Example</h3>
+                <pre><code class="language-lua">require("nomad").setup({
+  -- Sidebar configuration
+  sidebar = {
+    width = 45,
+    position = "left", -- "left", "right", or "float"
+    border = "rounded",
+  },
+
+  -- Nomad configuration
+  nomad = {
+    address = nil, -- Uses NOMAD_ADDR env var
+    token = nil,   -- Uses NOMAD_TOKEN env var
+    timeout = 30000,
+    namespace = "default",
+  },
+
+  -- UI configuration
+  ui = {
+    show_icons = true,
+    refresh_interval = 30, -- seconds
+  },
+
+  -- Keybindings
+  keymaps = {
+    toggle_sidebar = "&lt;leader&gt;no",
+    refresh = "r",
+    details = "&lt;CR&gt;",
+    -- ... more keymaps
+  },
+})</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- Documentation Section -->
+    <section id="docs" class="docs">
+        <div class="container">
+            <h2>📚 Documentation</h2>
+            <div class="docs-grid">
+                <div class="doc-card">
+                    <div class="doc-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <h3>Configuration</h3>
+                    <p>Complete configuration guide with all available options and examples</p>
+                    <a href="https://github.com/lukaszmoskwa/nomad.nvim#%EF%B8%8F-configuration" class="doc-link">
+                        View Configuration <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-icon">
+                        <i class="fas fa-wrench"></i>
+                    </div>
+                    <h3>Development</h3>
+                    <p>Development setup, testing, and contribution guidelines</p>
+                    <a href="https://github.com/lukaszmoskwa/nomad.nvim#%EF%B8%8F-development" class="doc-link">
+                        Development Guide <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-icon">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <h3>Troubleshooting</h3>
+                    <p>Common issues and solutions for plugin configuration and usage</p>
+                    <a href="https://github.com/lukaszmoskwa/nomad.nvim#-troubleshooting" class="doc-link">
+                        Troubleshooting <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-icon">
+                        <i class="fas fa-road"></i>
+                    </div>
+                    <h3>Roadmap</h3>
+                    <p>Upcoming features and planned improvements</p>
+                    <a href="https://github.com/lukaszmoskwa/nomad.nvim#-roadmap" class="doc-link">
+                        View Roadmap <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Nomad.nvim</h4>
+                    <p>A beautiful Neovim plugin for HashiCorp Nomad cluster management</p>
+                    <div class="social-links">
+                        <a href="https://github.com/lukaszmoskwa/nomad.nvim" target="_blank">
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Links</h4>
+                    <ul>
+                        <li><a href="https://github.com/lukaszmoskwa/nomad.nvim">GitHub Repository</a></li>
+                        <li><a href="https://github.com/lukaszmoskwa/nomad.nvim/issues">Report Issues</a></li>
+                        <li><a href="https://github.com/lukaszmoskwa/nomad.nvim/blob/main/CONTRIBUTING.md">Contributing</a></li>
+                        <li><a href="https://github.com/lukaszmoskwa/nomad.nvim/blob/main/LICENSE">License</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Built With</h4>
+                    <ul>
+                        <li><a href="https://github.com/MunifTanjim/nui.nvim">nui.nvim</a></li>
+                        <li><a href="https://github.com/nvim-telescope/telescope.nvim">telescope.nvim</a></li>
+                        <li><a href="https://github.com/nvim-lua/plenary.nvim">plenary.nvim</a></li>
+                        <li><a href="https://www.nomadproject.io/">HashiCorp Nomad</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Nomad.nvim. Licensed under the MIT License.</p>
+                <p>Made with <span class="cursor-badge">100% Cursor</span></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> 
