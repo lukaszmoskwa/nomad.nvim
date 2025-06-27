@@ -7,16 +7,16 @@ function M.format_bytes(bytes)
   if not bytes or bytes == 0 then
     return "0 B"
   end
-  
-  local units = {"B", "KB", "MB", "GB", "TB"}
+
+  local units = { "B", "KB", "MB", "GB", "TB" }
   local unit_index = 1
   local size = bytes
-  
+
   while size >= 1024 and unit_index < #units do
     size = size / 1024
     unit_index = unit_index + 1
   end
-  
+
   return string.format("%.1f %s", size, units[unit_index])
 end
 
@@ -25,7 +25,7 @@ function M.format_cpu(mhz)
   if not mhz or mhz == 0 then
     return "0 MHz"
   end
-  
+
   if mhz >= 1000 then
     return string.format("%.1f GHz", mhz / 1000)
   else
@@ -38,9 +38,9 @@ function M.format_duration(nanoseconds)
   if not nanoseconds or nanoseconds == 0 then
     return "0s"
   end
-  
+
   local seconds = nanoseconds / 1000000000
-  
+
   if seconds < 60 then
     return string.format("%.1fs", seconds)
   elseif seconds < 3600 then
@@ -57,16 +57,16 @@ function M.format_relative_time(timestamp)
   if not timestamp then
     return "unknown"
   end
-  
+
   -- Convert from nanoseconds to seconds if needed
   local ts = timestamp
   if timestamp > 9999999999999 then -- If timestamp looks like nanoseconds
     ts = timestamp / 1000000000
   end
-  
+
   local now = os.time()
   local diff = now - ts
-  
+
   if diff < 60 then
     return string.format("%ds ago", diff)
   elseif diff < 3600 then
@@ -83,11 +83,11 @@ function M.truncate(str, max_length)
   if not str then
     return ""
   end
-  
+
   if #str <= max_length then
     return str
   end
-  
+
   return str:sub(1, max_length - 3) .. "..."
 end
 
@@ -96,7 +96,7 @@ function M.is_empty(table)
   if not table then
     return true
   end
-  
+
   return next(table) == nil
 end
 
@@ -104,7 +104,7 @@ end
 function M.deep_copy(orig)
   local orig_type = type(orig)
   local copy
-  if orig_type == 'table' then
+  if orig_type == "table" then
     copy = {}
     for orig_key, orig_value in next, orig, nil do
       copy[M.deep_copy(orig_key)] = M.deep_copy(orig_value)
@@ -133,38 +133,38 @@ end
 function M.unique(table)
   local seen = {}
   local result = {}
-  
+
   for _, value in ipairs(table) do
     if not seen[value] then
       seen[value] = true
       table.insert(result, value)
     end
   end
-  
+
   return result
 end
 
 -- Filter table by predicate function
 function M.filter(table, predicate)
   local result = {}
-  
+
   for i, value in ipairs(table) do
     if predicate(value, i) then
       table.insert(result, value)
     end
   end
-  
+
   return result
 end
 
 -- Map table values using function
 function M.map(table, func)
   local result = {}
-  
+
   for i, value in ipairs(table) do
     result[i] = func(value, i)
   end
-  
+
   return result
 end
 
@@ -175,7 +175,7 @@ function M.find(table, predicate)
       return value, i
     end
   end
-  
+
   return nil, nil
 end
 
@@ -186,25 +186,25 @@ function M.contains(table, value)
       return true
     end
   end
-  
+
   return false
 end
 
 -- Sort table by field
 function M.sort_by_field(table, field, reverse)
   local sorted = M.deep_copy(table)
-  
+
   table.sort(sorted, function(a, b)
     local a_val = a[field]
     local b_val = b[field]
-    
+
     if reverse then
       return a_val > b_val
     else
       return a_val < b_val
     end
   end)
-  
+
   return sorted
 end
 
@@ -212,14 +212,14 @@ end
 function M.get_nested(table, path)
   local keys = vim.split(path, ".", { plain = true })
   local current = table
-  
+
   for _, key in ipairs(keys) do
     if type(current) ~= "table" or current[key] == nil then
       return nil
     end
     current = current[key]
   end
-  
+
   return current
 end
 
@@ -227,7 +227,7 @@ end
 function M.set_nested(table, path, value)
   local keys = vim.split(path, ".", { plain = true })
   local current = table
-  
+
   for i = 1, #keys - 1 do
     local key = keys[i]
     if type(current[key]) ~= "table" then
@@ -235,7 +235,7 @@ function M.set_nested(table, path, value)
     end
     current = current[key]
   end
-  
+
   current[keys[#keys]] = value
 end
 
@@ -253,13 +253,13 @@ function M.url_encode(str)
   if not str then
     return ""
   end
-  
+
   str = string.gsub(str, "\n", "\r\n")
   str = string.gsub(str, "([^%w _%%%-%.~])", function(c)
     return string.format("%%%02X", string.byte(c))
   end)
   str = string.gsub(str, " ", "+")
-  
+
   return str
 end
 
@@ -288,7 +288,7 @@ function M.capitalize(str)
   if not str or #str == 0 then
     return ""
   end
-  
+
   return str:sub(1, 1):upper() .. str:sub(2):lower()
 end
 
@@ -299,7 +299,9 @@ end
 
 -- Convert snake_case to camelCase
 function M.snake_to_camel(str)
-  return str:gsub("_(%w)", function(c) return c:upper() end)
+  return str:gsub("_(%w)", function(c)
+    return c:upper()
+  end)
 end
 
 -- Escape special characters for use in patterns
@@ -327,4 +329,41 @@ function M.normalize_path(path)
   return path:gsub("\\", "/")
 end
 
-return M 
+-- Format timestamp to human readable format
+function M.format_time(timestamp)
+  if not timestamp then
+    return "N/A"
+  end
+
+  -- Convert from nanoseconds to seconds if needed
+  local ts = timestamp
+  if timestamp > 9999999999999 then -- If timestamp looks like nanoseconds
+    ts = timestamp / 1000000000
+  end
+
+  return os.date("%Y-%m-%d %H:%M:%S", ts)
+end
+
+-- Truncate string to max length (alias for truncate)
+function M.truncate_string(str, max_length)
+  return M.truncate(str, max_length)
+end
+
+-- Get status icon for job/node status
+function M.get_status_icon(status)
+  local icons = {
+    running = "▶️",
+    pending = "⏸️",
+    dead = "💀",
+    failed = "❌",
+    complete = "✅",
+    ready = "🟢",
+    down = "🔴",
+    ineligible = "⚫",
+    draining = "🟠",
+  }
+
+  return icons[status] or "❓"
+end
+
+return M

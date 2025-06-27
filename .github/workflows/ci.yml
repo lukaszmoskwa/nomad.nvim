@@ -1,0 +1,269 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  luacheck:
+    name: Luacheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Lua
+        uses: leafo/gh-actions-lua@v10
+        with:
+          luaVersion: "5.1"
+      
+      - name: Setup Luarocks
+        uses: leafo/gh-actions-luarocks@v4
+      
+      - name: Install Luacheck
+        run: luarocks install luacheck
+      
+      - name: Run Luacheck
+        run: luacheck lua/ --config .luacheckrc
+
+  stylua:
+    name: StyLua Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup StyLua
+        uses: JohnnyMorganz/stylua-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          version: latest
+          args: --check lua/
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        neovim_version: ['v0.9.5', 'v0.10.0', 'nightly']
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Neovim
+        uses: MunifTanjim/setup-neovim-action@v1
+        with:
+          tag: ${{ matrix.neovim_version }}
+      
+      - name: Setup Lua
+        uses: leafo/gh-actions-lua@v10
+        with:
+          luaVersion: "5.1"
+      
+      - name: Setup Luarocks
+        uses: leafo/gh-actions-luarocks@v4
+      
+      - name: Install test dependencies
+        run: |
+          luarocks install busted
+          luarocks install luacov
+      
+      - name: Run tests
+        run: |
+          nvim --version
+          busted --coverage --verbose tests/
+      
+      - name: Generate coverage report
+        run: luacov
+      
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./luacov.report.out
+          flags: unittests
+          name: codecov-umbrella
+
+  integration-test:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Neovim
+        uses: MunifTanjim/setup-neovim-action@v1
+        with:
+          tag: 'v0.10.0'
+      
+      - name: Setup Lua
+        uses: leafo/gh-actions-lua@v10
+        with:
+          luaVersion: "5.1"
+      
+      - name: Setup Luarocks
+        uses: leafo/gh-actions-luarocks@v4
+      
+      - name: Install test dependencies
+        run: |
+          luarocks install busted
+          luarocks install luacov
+      
+      - name: Start Nomad in dev mode
+        run: |
+          # Create a Nomad configuration for server-only mode (avoids cgroup issues)
+          cat > nomad.hcl << 'EOF'
+          datacenter = "dc1"
+          data_dir = "/tmp/nomad"
+          bind_addr = "0.0.0.0"
+          log_level = "INFO"
+          
+          server {
+            enabled = true
+            bootstrap_expect = 1
+          }
+          
+          # Disable client to avoid cgroup issues in Docker
+          client {
+            enabled = false
+          }
+          
+          ui {
+            enabled = true
+          }
+          EOF
+          
+          # Start Nomad in server-only mode using Docker
+          docker run -d \
+            --name nomad-dev \
+            -p 4646:4646 \
+            -e NOMAD_SKIP_DOCKER_IMAGE_WARN=1 \
+            -v "$(pwd)/nomad.hcl:/etc/nomad.d/nomad.hcl:ro" \
+            hashicorp/nomad:1.7 \
+            agent -config=/etc/nomad.d/nomad.hcl
+          
+          # Wait a bit for container to start
+          sleep 5
+          
+          # Show initial logs
+          echo "=== Nomad startup logs ==="
+          docker logs nomad-dev
+          
+          # Wait for Nomad to be ready with more verbose output
+          echo "=== Waiting for Nomad API to be ready ==="
+          for i in {1..30}; do
+            echo "Attempt $i/30: Checking Nomad API..."
+            if curl -f http://localhost:4646/v1/status/leader 2>/dev/null; then
+              echo "✅ Nomad API is ready!"
+              break
+            fi
+            if [ $i -eq 30 ]; then
+              echo "❌ Nomad API failed to start within 60 seconds"
+              echo "=== Final Nomad logs ==="
+              docker logs nomad-dev
+              exit 1
+            fi
+            sleep 2
+          done
+          
+          # Verify Nomad is running and show cluster info
+          echo "=== Nomad cluster status ==="
+          curl -s http://localhost:4646/v1/status/leader
+          echo ""
+          curl -s http://localhost:4646/v1/nodes | jq '.' || echo "No jq available, raw response above"
+        
+      - name: Run integration tests
+        run: |
+          export NOMAD_ADDR=http://localhost:4646
+          busted --verbose tests/integration_spec.lua
+
+  docs:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Lua
+        uses: leafo/gh-actions-lua@v10
+        with:
+          luaVersion: "5.1"
+      
+      - name: Setup Luarocks
+        uses: leafo/gh-actions-luarocks@v4
+      
+      - name: Install ldoc
+        run: luarocks install ldoc
+      
+      - name: Generate documentation
+        run: ldoc -d docs lua/
+      
+      - name: Check for documentation completeness
+        run: |
+          # Check if all public functions have documentation
+          # Look for function M.name patterns and check for preceding comments
+          echo "Checking for documented public functions..."
+          
+          # Create temporary files to store results
+          temp_file=$(mktemp)
+          
+          # Find all public function definitions (M.function_name = function or function M.function_name)
+          if grep -rn "function M\." lua/ > /dev/null 2>&1; then
+            grep -rn "function M\." lua/ | while IFS=: read -r file line_num content; do
+              func_line=$(echo "$content" | sed 's/.*function \(M\.[^(]*\).*/\1/')
+              echo "Found function: $func_line in $file:$line_num"
+              
+              # Check if there's a comment within 3 lines before the function
+              prev_line=$((line_num - 1))
+              if [ $prev_line -gt 0 ]; then
+                comment_check=$(sed -n "${prev_line}p" "$file" 2>/dev/null | grep -E "^--" || true)
+                if [ -z "$comment_check" ]; then
+                  echo "  ⚠️  No comment found for $func_line"
+                else
+                  echo "  ✅ Documented: $func_line"
+                fi
+              fi
+            done
+          fi
+          
+          # Also check for M.name = function patterns
+          if grep -rn "M\.[a-zA-Z_][a-zA-Z0-9_]* = function" lua/ > /dev/null 2>&1; then
+            grep -rn "M\.[a-zA-Z_][a-zA-Z0-9_]* = function" lua/ | while IFS=: read -r file line_num content; do
+              func_line=$(echo "$content" | sed 's/.*\(M\.[^=]*\) = function.*/\1/')
+              echo "Found function: $func_line in $file:$line_num"
+              
+              # Check if there's a comment within 3 lines before the function
+              prev_line=$((line_num - 1))
+              if [ $prev_line -gt 0 ]; then
+                comment_check=$(sed -n "${prev_line}p" "$file" 2>/dev/null | grep -E "^--" || true)
+                if [ -z "$comment_check" ]; then
+                  echo "  ⚠️  No comment found for $func_line"
+                else
+                  echo "  ✅ Documented: $func_line"
+                fi
+              fi
+            done
+          fi
+          
+          # Clean up
+          rm -f "$temp_file"
+          
+          echo "Documentation check completed (informational only)"
+          exit 0
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+      
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif' 

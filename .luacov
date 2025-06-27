@@ -1,0 +1,31 @@
+-- LuaCov configuration
+return {
+  -- Patterns for files to include in coverage
+  include = {
+    "lua/nomad",
+  },
+  
+  -- Patterns for files to exclude from coverage
+  exclude = {
+    "lua/telescope/_extensions",
+    "tests",
+  },
+  
+  -- Output configuration
+  reportfile = "luacov.report.out",
+  statsfile = "luacov.stats.out",
+  
+  -- Coverage thresholds
+  coveralls = {
+    pathcorrect = {
+      {"^lua/", ""},
+    },
+  },
+  
+  -- Run configuration
+  runreport = true,
+  deletestats = false,
+  
+  -- Reporter configuration
+  reporter = "default",
+} 
