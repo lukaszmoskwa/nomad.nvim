@@ -114,6 +114,7 @@ jobs:
           datacenter = "dc1"
           data_dir = "/tmp/nomad"
           bind_addr = "0.0.0.0"
+          log_level = "INFO"
           
           server {
             enabled = true
@@ -125,11 +126,9 @@ jobs:
             enabled = false
           }
           
-          ui_config {
+          ui {
             enabled = true
           }
-          
-          log_level = "INFO"
           EOF
           
           # Start Nomad in server-only mode using Docker
